@@ -14,7 +14,7 @@ namespace DayTwo
             Down
         }
 
-        private record Position(int Horizontal, int Depth);
+        private record Position(int Horizontal, int Depth, int Aim);
 
         private record Heading(Direction Direction, int Distance);
 
@@ -28,16 +28,23 @@ namespace DayTwo
         {
             var headings = ParseHeadings(input).ToArray();
 
-            var forward = SumHeadings(headings, Direction.Forward);
-            var up = SumHeadings(headings, Direction.Up);
-            var down = SumHeadings(headings, Direction.Down);
-
-            return new Position(forward, down - up);
+            return headings.Aggregate(new Position(0, 0, 0), UpdatePosition);
         }
 
-        private static int SumHeadings(Heading[] headings, Direction direction) => headings
-            .Where(h => h.Direction == direction)
-            .Aggregate(0, (total, next) => total + next.Distance);
+        private static Position UpdatePosition(Position position, Heading heading)
+        {
+            return heading.Direction switch
+            {
+                Direction.Down => position with {Aim = position.Aim + heading.Distance},
+                Direction.Up => position with {Aim = position.Aim - heading.Distance},
+                Direction.Forward => position with
+                {
+                    Horizontal = position.Horizontal + heading.Distance,
+                    Depth = position.Depth + (position.Aim * heading.Distance)
+                },
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
 
         private static IEnumerable<Heading> ParseHeadings(IEnumerable<string> headings) =>
             headings.Select(ParseHeading);
@@ -67,7 +74,7 @@ namespace DayTwo
 
             var result = CalculateSumPosition(input);
 
-            return result.Horizontal * result.Depth == 150;
+            return result.Horizontal * result.Depth == 900;
         }
     }
 }
