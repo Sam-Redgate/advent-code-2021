@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace DayThree
 {
-    internal class Program
+    internal static class Program
     {
         public static void Main()
         {
-            Console.WriteLine(Test());
-            Console.WriteLine(CalculatePowerConsumption(File.ReadLines("./Resources/input.txt")));
+            Test();
+            var input = File.ReadLines("./Resources/input.txt").ToArray();
+            Console.WriteLine($"Oxygen Generator Rating: {FindOxygenGeneratorRating(input)}");
+            Console.WriteLine($"CO2 Scrubber Rating: {FindCO2ScrubberRating(input)}");
         }
 
-        private record PowerReadings(string Gamma, string Epsilon);
-
-        private static bool Test()
+        private static void Test()
         {
             var input = new[]
             {
@@ -35,82 +32,56 @@ namespace DayThree
                 "01010"
             };
 
-            var result = CalculatePowerConsumption(input);
+            var oxygenResult = FindOxygenGeneratorRating(input);
 
-            return result == new PowerReadings("10110", "01001");
+            Console.WriteLine($"{oxygenResult} == 10111? {oxygenResult.Equals("10111")}");
+
+            var co2Result = FindCO2ScrubberRating(input);
+            
+            Console.WriteLine($"{co2Result} == 01010? {co2Result.Equals("01010")}");
         }
 
-        private static PowerReadings CalculatePowerConsumption(IEnumerable<string> input)
+        private static string FindOxygenGeneratorRating(string[] input, int index = 0)
         {
-            var bitArrays = ParseToBitArrays(input).ToArray();
-            var width = bitArrays[0].Length;
-            var gammaResults = new BitArray(width);
-            var epsilonResults = new BitArray(width);
-
-            for (var i = width - 1; i >= 0; i--)
+            switch (input.Length)
             {
-                var index = i;
-                var trues = SumTrue(bitArrays.Select(ba => ba.Get(index)));
-                var falses = SumFalse(bitArrays.Select(ba => ba.Get(index)));
-
-                gammaResults[i] = trues > falses;
+                case 1:
+                    return input[0];
+                case 2:
+                    return input[0].ToCharArray()[index] == '1' ? input[0] : input[1];
+                default:
+                    return FindOxygenGeneratorRating(SelectGreatestOccurence(input, index), index + 1);
             }
-
-            for (var i = width - 1; i >= 0; i--)
-            {
-                var index = i;
-                var trues = SumTrue(bitArrays.Select(ba => ba.Get(index)));
-                var falses = SumFalse(bitArrays.Select(ba => ba.Get(index)));
-
-                epsilonResults[i] = trues < falses;
-            }
-
-            return new PowerReadings(WriteBitsToString(gammaResults), WriteBitsToString(epsilonResults));
         }
 
-        private static string WriteBitsToString(BitArray bits)
+        private static string[] SelectGreatestOccurence(string[] input, int index = 0)
         {
-            var result = "";
+            var zeroes = input.Where(i => i.ToCharArray()[index] == '0').ToArray();
+            var ones = input.Where(i => i.ToCharArray()[index] == '1').ToArray();
 
-            foreach (bool bit in bits)
-            {
-                if (bit)
-                {
-                    result = result + "1";
-                }
-                else
-                {
-                    result = result + "0";
-                }
-            }
-
-            return result;
+            return zeroes.Length > ones.Length ? zeroes : ones;
         }
 
-        private static int SumTrue(IEnumerable<bool> bools) => bools.Aggregate(0, (i, b) => b ? i + 1 : i);
-        private static int SumFalse(IEnumerable<bool> bools) => bools.Aggregate(0, (i, b) => b ? i : i + 1);
-
-        private static IEnumerable<BitArray> ParseToBitArrays(IEnumerable<string> input) =>
-            input.Select(ParseToBitArray);
-
-        private static BitArray ParseToBitArray(string input)
+        // ReSharper disable once InconsistentNaming
+        private static string FindCO2ScrubberRating(string[] input, int index = 0)
         {
-            var bools = new bool[input.Length];
-            var tokens = input.ToCharArray();
-
-            for (int i = 0; i < input.Length; i++)
+            switch (input.Length)
             {
-                if (tokens[i] == '1')
-                {
-                    bools[i] = true;
-                }
-                else
-                {
-                    bools[i] = false;
-                }
+                case 1:
+                    return input[0];
+                case 2:
+                    return input[0].ToCharArray()[index] == '0' ? input[0] : input[1];
+                default:
+                    return FindCO2ScrubberRating(SelectLeastOccurence(input, index), index + 1);
             }
+        }
 
-            return new BitArray(bools);
+        private static string[] SelectLeastOccurence(string[] input, int index = 0)
+        {
+            var zeroes = input.Where(i => i.ToCharArray()[index] == '0').ToArray();
+            var ones = input.Where(i => i.ToCharArray()[index] == '1').ToArray();
+
+            return zeroes.Length < ones.Length ? zeroes : ones;
         }
     }
 }
