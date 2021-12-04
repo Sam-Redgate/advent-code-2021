@@ -11,9 +11,13 @@ namespace DayFour
 
         private readonly Number[][] _board;
 
+        public string Id { get; }
+
         public Board(IEnumerable<string> stringBoard)
         {
-            _board = ParseBoard(stringBoard);
+            var stringBoardArray = stringBoard.ToArray();
+            _board = ParseBoard(stringBoardArray);
+            Id = string.Join(' ', stringBoardArray);
         }
 
         public bool MarkNumber(int number)

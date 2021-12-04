@@ -12,9 +12,36 @@ namespace DayFour
         public static void Main()
         {
             // PlayGame(File.ReadLines("./Resources/test.txt"));
-            PlayGame(File.ReadLines("./Resources/input.txt"));
+            // PlayGame(File.ReadLines("./Resources/input.txt"));
+            FindLastWinner(File.ReadLines("./Resources/input.txt"));
         }
 
+        private static void FindLastWinner(IEnumerable<string> input)
+        {
+            var game = ParseGame(input);
+            var winners = new Dictionary<string, Board>();
+
+            Console.Write("Calling: ");
+            foreach (var numberCalled in game.Numbers)
+            {
+                Console.Write($"{numberCalled},");
+                foreach (var board in game.Boards)
+                {
+                    var winner = board.MarkNumber(numberCalled);
+
+                    if (!winner) continue;
+                    
+                    winners[board.Id] = board;
+                    
+                    if (winners.Count != game.Boards.Count()) continue;
+                    
+                    Console.WriteLine($"Found final winner:\n\n{board}\nWinning value:{board.CalculateScore(numberCalled)}");
+                    return;
+                }
+            }
+        }
+
+        // ReSharper disable once UnusedMember.Local
         private static void PlayGame(IEnumerable<string> input)
         {
             var game = ParseGame(input);
