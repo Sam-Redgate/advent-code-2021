@@ -27,8 +27,6 @@ namespace DayFive
             IEnumerable<CoOrdinate> coordinates = Array.Empty<CoOrdinate>();
             foreach (var ventLine in ventLines)
             {
-                // skip diagonal lines
-                if (ventLine.Start.X != ventLine.End.X && ventLine.Start.Y != ventLine.End.Y) continue;
                 coordinates = coordinates.Concat(CalculateLinePoints(ventLine));
             }
 
@@ -42,6 +40,10 @@ namespace DayFive
 
         private static CoOrdinate[] CalculateLinePoints(VentLine ventLine)
         {
+            
+            
+            
+            
             IEnumerable<CoOrdinate> coords = Array.Empty<CoOrdinate>();
 
             var xRange = Math.Abs(ventLine.Start.X - ventLine.End.X);
@@ -50,15 +52,47 @@ namespace DayFive
             var xStart = ventLine.Start.X < ventLine.End.X ? ventLine.Start.X : ventLine.End.X;
             var yStart = ventLine.Start.Y < ventLine.End.Y ? ventLine.Start.Y : ventLine.End.Y;
 
-            for (int y = yStart; y <= yStart + yRange; y++)
+            // Vertical
+            if (xRange == 0)
             {
-                for (int x = xStart; x <= xStart + xRange; x++)
-                {
-                    coords = coords.Append(new CoOrdinate(x, y));
-                }
+                coords = CalculateSteps(ventLine.Start.Y, ventLine.End.Y).Aggregate(coords, (current, yStep) => current.Append(new CoOrdinate(xStart, yStep)));
+            }
+            // Horizontal
+            else if (yRange == 0)
+            {
+                coords = CalculateSteps(ventLine.Start.X, ventLine.End.X).Aggregate(coords, (current, xStep) => current.Append(new CoOrdinate(xStep, yStart)));
+            }
+            // Diagonal
+            else
+            {
+                coords = CalculateSteps(ventLine.Start.X, ventLine.End.X)
+                    .Zip(CalculateSteps(ventLine.Start.Y, ventLine.End.Y), (x, y) => new CoOrdinate(x, y));
             }
 
             return coords.ToArray();
+        }
+
+        private static IEnumerable<int> CalculateSteps(int a, int b)
+        {
+            var direction = a > b ? -1 : 1;
+            var current = a;
+
+            if (direction > 0)
+            {
+                while (current <= b)
+                {
+                    yield return current;
+                    current += direction;
+                }
+            }
+            else
+            {
+                while (current >= b)
+                {
+                    yield return current;
+                    current += direction;
+                }
+            }
         }
 
         private static int[][] BuildEmptyMap(IEnumerable<VentLine> ventLines)
@@ -104,7 +138,7 @@ namespace DayFive
             {
                 foreach (var number in row)
                 {
-                    result.Append($"{number, 2}");
+                    result.Append($"{number,2}");
                 }
 
                 result.Append('\n');
