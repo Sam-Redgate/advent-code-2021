@@ -11,57 +11,54 @@ namespace DaySix
     {
         private static void Main()
         { 
-            Lanternfish[] lanternfish = ParseLanternfishInput(File.ReadLines("./Resources/input.txt").First()).ToArray();
-            var daysToRun = 256;
+            var school = new LanternfishSchool(File.ReadLines("./Resources/input.txt").First());
+            const int daysToRun = 256;
             
-            for (int daysRun = 0; daysToRun - daysRun > 0; daysRun++)
+            for (var daysRun = 0; daysToRun - daysRun > 0; daysRun++)
             {
-                IEnumerable<Lanternfish> newFishList = Array.Empty<Lanternfish>();
-                
-                foreach (var fish in lanternfish)
-                {
-                    var newFish = fish.NewReproductionWindow();
-                    if (newFish != null) newFishList = newFishList.Append(newFish);
-                }
-
-                lanternfish = lanternfish.Concat(newFishList).ToArray();
+                school.IncrementDay();
             }
-            
-            Console.WriteLine($"There are {lanternfish.Length} lanternfish.");
+            Console.WriteLine($"There are {school.CountFish()} lanternfish.");
         }
-
-        private static IEnumerable<Lanternfish> ParseLanternfishInput(string input) => input.Split(',').Select(s => Convert.ToInt32(s)).Select(t => new Lanternfish(t));
     }
 
-    public class Lanternfish
+    public class LanternfishSchool
     {
-        private ushort _reproductionTimer;
+        private readonly ulong[] _school;
 
-        private Lanternfish()
+        public LanternfishSchool(string input)
         {
-            _reproductionTimer = 8;
-        }
-
-        public Lanternfish(int reproductionTimer)
-        {
-            _reproductionTimer = Convert.ToUInt16(reproductionTimer);
-        }
-
-        public Lanternfish? NewReproductionWindow()
-        {
-            if (_reproductionTimer == 0)
+            _school = new ulong[9];
+            foreach (var fish in ParseLanternfishInput(input))
             {
-                _reproductionTimer = 6;
-                return new Lanternfish();
+                _school[fish]++;
             }
-            _reproductionTimer--;
-            return null;
         }
+
+        public void IncrementDay()
+        {
+            var newFish = _school[0];
+
+            Array.Copy(_school, 1, _school, 0, _school.Length - 1);
+
+            _school[8] = newFish;
+            _school[6] += newFish;
+        }
+
+        public ulong CountFish() => _school.Aggregate(0ul, (sum, fish) => sum + fish);
+
+        private static IEnumerable<int> ParseLanternfishInput(string input) => input.Split(',').Select(s => Convert.ToInt32(s));
 
         public override string ToString()
         {
-            return _reproductionTimer.ToString();
+            var builder = new StringBuilder();
+
+            foreach (var day in _school)
+            {
+                builder.Append($"{day},");
+            }
+
+            return builder.ToString();
         }
-        
     }
 }
