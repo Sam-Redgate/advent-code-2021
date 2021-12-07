@@ -9,10 +9,10 @@ namespace DaySeven
     {
         private static void Main()
         {
-            var result = CalculateOptimalHorizontalPosition(
-                ParseHorizontalPositions(File.ReadLines("./Resources/test.txt").FirstOrDefault()).ToArray());
             // var result = CalculateOptimalHorizontalPosition(
-            //     ParseHorizontalPositions(File.ReadLines("./Resources/input.txt").FirstOrDefault()).ToArray());
+            //     ParseHorizontalPositions(File.ReadLines("./Resources/test.txt").FirstOrDefault()).ToArray());
+            var result = CalculateOptimalHorizontalPosition(
+                ParseHorizontalPositions(File.ReadLines("./Resources/input.txt").FirstOrDefault()).ToArray());
             Console.WriteLine($"Optimal horizontal position is {result}");
         }
 
@@ -32,14 +32,7 @@ namespace DaySeven
                     .Zip(CalculateAllManeuvers(position, greatestHorizontalPosition))
                     .Select(a => a.First + a.Second).ToArray());
 
-            var cheapestManeuver = sumManeuvers.Min();
-
-            foreach (var maneuver in sumManeuvers)
-            {
-                if (maneuver == cheapestManeuver) return maneuver;
-            }
-
-            return -1; // Shouldn't be reached.
+            return sumManeuvers.Min();
         }
 
         private static int[] CalculateAllManeuvers(int position, int greatestHorizontalPosition)
@@ -47,7 +40,11 @@ namespace DaySeven
             var maneuvers = new int[greatestHorizontalPosition + 1];
             for (var i = 0; i < maneuvers.Length; i++)
             {
-                maneuvers[i] = Math.Abs(position - i);
+                var horizontalOffset = Math.Abs(position - i);
+
+                var maneuverCost = horizontalOffset * (horizontalOffset + 1) / 2; // Good ol' Gauss
+                
+                maneuvers[i] = maneuverCost;
             }
 
             return maneuvers;
