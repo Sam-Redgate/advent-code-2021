@@ -4,62 +4,81 @@ public static class Program
 {
     public static void Main()
     {
-        var map = ParseMap(File.ReadLines("./Resources/input.txt"));
-        var result = CalculateLowestRiskSum(map);
-        Console.WriteLine(result);
+        var map = new HeatMap(File.ReadLines("./Resources/input.txt"));
+        Console.Out.WriteLine(map.Basins.OrderByDescending(b => b.Length).Take(3).Aggregate(1, (sum, b) => sum * b.Length));
+    }
+}
+
+public class HeatMap
+{
+    public HeightPoint[][] Basins { get; }
+
+    public record HeightPoint(int Height, bool Mapped = false);
+
+    public HeatMap(IEnumerable<string> input)
+    {
+        Basins = CalculateBasins(ParseMap(input));
     }
 
-    private static int CalculateLowestRiskSum(int[,] map)
+    private static HeightPoint[][] CalculateBasins(HeightPoint[,] map)
     {
-        var sum = 0;
+        var height = map.GetLength(0);
+        var width = map.GetLength(1);
+        var basins = Array.Empty<HeightPoint[]>();
 
-        for (var y = 0; y < map.GetLength(0); y++)
+        for (var y = 0; y < height; y++)
         {
-            for (var x = 0; x < map.GetLength(1); x++)
+            for (var x = 0; x < width; x++)
             {
-                if (IsLowestPoint(x, y, map))
+                if (IsLowPoint(map[y, x]) && !map[y, x].Mapped)
                 {
-                    sum += CalculateRiskLevel(map[y, x]);
+                    basins = basins.Append(BuildBasin(x, y, map)).ToArray();
                 }
             }
         }
 
-        return sum;
+        return basins;
     }
 
-    private static int[,] ParseMap(IEnumerable<string> rows)
+    private static HeightPoint[] BuildBasin(int x, int y, HeightPoint[,] map)
+    {
+        var maxHeight = map.GetLength(0);
+        var maxWidth = map.GetLength(1);
+        
+        if (!IsLowPoint(map[y, x]) || map[y, x].Mapped)
+        {
+            return Array.Empty<HeightPoint>();
+        }
+
+        map[y, x] = map[y, x] with {Mapped = true};
+
+        var subBasin = new [] {map[y, x]};
+
+        if (x - 1 >= 0) subBasin = subBasin.Concat(BuildBasin(x - 1, y, map)).ToArray();
+        if (x + 1 < maxWidth) subBasin = subBasin.Concat(BuildBasin(x + 1, y, map)).ToArray();
+        if (y - 1 >= 0) subBasin = subBasin.Concat(BuildBasin(x, y - 1, map)).ToArray();
+        if (y + 1 < maxHeight) subBasin = subBasin.Concat(BuildBasin(x, y + 1, map)).ToArray();
+
+        return subBasin;
+    }
+
+    private static HeightPoint[,] ParseMap(IEnumerable<string> rows)
     {
         var rowArray = rows.ToArray();
 
-        var map = new int[rowArray.Length, rowArray[0].Length];
+        var map = new HeightPoint[rowArray.Length, rowArray[0].Length];
 
         for (var y = 0; y < rowArray.Length; y++)
         {
             var heights = rowArray[y].ToCharArray().Select(c => Convert.ToInt32(c.ToString())).ToArray();
             for (var x = 0; x < rowArray[y].Length; x++)
             {
-                map[y, x] = heights[x];
+                map[y, x] = new HeightPoint(heights[x]);
             }
         }
 
         return map;
     }
 
-    private static bool IsLowestPoint(int x, int y, int[,] map)
-    {
-        var maxHeight = map.GetLength(0);
-        var maxWidth = map.GetLength(1);
-        var currentValue = map[y, x];
-
-        var isLowest = true;
-
-        if (x - 1 >= 0) isLowest &= map[y, x - 1] > currentValue;
-        if (x + 1 < maxWidth) isLowest &= map[y, x + 1] > currentValue;
-        if (y - 1 >= 0) isLowest &= map[y - 1, x] > currentValue;
-        if (y + 1 < maxHeight) isLowest &= map[y + 1, x] > currentValue;
-        
-        return isLowest;
-    }
-
-    private static int CalculateRiskLevel(int height) => height + 1;
+    private static bool IsLowPoint(HeightPoint point) => point.Height < 9;
 }
