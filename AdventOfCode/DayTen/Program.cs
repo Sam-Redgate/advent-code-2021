@@ -4,38 +4,35 @@
     {
         public static void Main()
         {
-            var scoreTable = new Dictionary<int, int>
-            {
-                {3, 0},
-                {57, 0},
-                {1197, 0},
-                {25137, 0}
-            };
+            IEnumerable<ulong> scores = Array.Empty<ulong>();
             
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var line in File.ReadLines("./Resources/input.txt"))
             {
                 var parser = SyntaxParser.ParseInput(line);
                 if (parser.IsCorrupted)
                 {
-                    scoreTable[parser.Score] += 1;
+                    continue;
                 }
+
+                scores = scores.Append(parser.AutoComplete());
             }
+
+            scores = scores.OrderBy(score => score).ToArray();
             
-            var total = scoreTable.Aggregate(0, (sum, pair) => sum + pair.Key * pair.Value);
-            
-            Console.WriteLine(total);
+            Console.WriteLine(scores.Skip(scores.Count() / 2).Take(1).First());
         }
     }
 
     public class SyntaxParser
     {
-        public int Score { get; }
+        private readonly char[] _tokens;
         public bool IsCorrupted { get; }
 
-        private SyntaxParser(int score, bool isCorrupted)
+        private SyntaxParser(bool isCorrupted, char[] tokens)
         {
-            Score = score;
             IsCorrupted = isCorrupted;
+            _tokens = tokens;
         }
 
         public static SyntaxParser ParseInput(string input)
@@ -43,7 +40,6 @@
             var chars = input.ToCharArray();
             var stack = new Stack<char>();
             var isCorrupted = false;
-            var score = 0;
 
             foreach (var c in chars)
             {
@@ -60,13 +56,12 @@
                     else
                     {
                         isCorrupted = true;
-                        score = ScoreIllegalCharacter(c);
-                        return new SyntaxParser(score, isCorrupted);
+                        return new SyntaxParser(isCorrupted, stack.ToArray());
                     }
                 }
             }
 
-            return new SyntaxParser(score, isCorrupted);
+            return new SyntaxParser(isCorrupted, stack.ToArray());
         }
 
         private static bool IsOpenCharacter(char c)
@@ -93,16 +88,55 @@
             }
         }
 
-        private static int ScoreIllegalCharacter(char c)
+        private static char GetClosingCharacter(char open)
+        {
+            return open switch
+            {
+                '(' => ')',
+                '[' => ']',
+                '{' => '}',
+                '<' => '>',
+                _ => '0'
+            };
+        }
+
+        private static ulong ScoreLegalCharacter(char c)
         {
             return c switch
             {
-                ')' => 3,
-                ']' => 57,
-                '}' => 1197,
-                '>' => 25137,
-                _ => 0
+                ')' => 1ul,
+                ']' => 2ul,
+                '}' => 3ul,
+                '>' => 4ul,
+                _ => 0ul
             };
+        }
+
+        public ulong AutoComplete()
+        {
+            var looseOpeners = new Stack<char>();
+            foreach (var c in _tokens)
+            {
+                if (IsOpenCharacter(c))
+                {
+                    looseOpeners.Push(c);
+                }
+                else if (IsCloseCharacter(c))
+                {
+                    looseOpeners.Pop();
+                }
+            }
+
+            var listOfClosers = new char[looseOpeners.Count];
+
+            for (var i = listOfClosers.Length - 1; i >= 0; i--)
+            {
+                listOfClosers[i] = GetClosingCharacter(looseOpeners.Pop());
+            }
+
+            var score = listOfClosers.Aggregate(0ul, (sum, closer) => sum * 5ul + ScoreLegalCharacter(closer));
+
+            return score;
         }
     }
 }
