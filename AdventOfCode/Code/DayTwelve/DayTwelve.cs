@@ -6,15 +6,7 @@ public static class DayTwelve
     {
         var startValue = "start";
         var endValue = "end";
-        var edges = ParseEdges(File.ReadAllLines("./Resources/DayTwelveInput.txt"));
-
-        var tree = PathTree.BuildTree(startValue, edges);
         
-        Console.WriteLine(tree.CountValue(endValue));
-    }
-
-    private static IEnumerable<(string, string)> ParseEdges(IEnumerable<string> input)
-    {
-        return input.Select(line => (line.Split('-')[0], line.Split('-')[1]));
+        Console.WriteLine(CaveGraph.CreateCaveGraph(File.ReadAllLines("./Resources/DayTwelveInput.txt"), startValue, endValue).CountPaths());
     }
 }
