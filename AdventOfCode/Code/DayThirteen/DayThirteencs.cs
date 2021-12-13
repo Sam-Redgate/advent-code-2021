@@ -17,7 +17,11 @@ internal static class DayThirteen
 
         var page = BuildPage(dots, maxHeight, maxWidth);
         
-        page = FoldPage(page, instructions[0]);
+        Console.WriteLine($"Starting page:\n{PrintPage(page)}\n");
+
+        page = instructions.Aggregate(page, FoldPage);
+
+        Console.WriteLine($"Final page:\n{PrintPage(page)}\n");
 
         var sum = PageIterator(page).Count(coordinate => page[coordinate.Y, coordinate.X] == '#');
 
