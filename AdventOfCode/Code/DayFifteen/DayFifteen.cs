@@ -16,13 +16,15 @@ public static class DayFifteen
     private static int GetShortestPathCost(int[][] map, Coordinate start, Coordinate goal)
     {
         var costLookup = BuildCoordinateSetOfCosts(map);
-        costLookup[start] = 0;
-
         var remainingCoordinates = costLookup.ToDictionary(pair => pair.Key, _ => int.MaxValue);
+        costLookup[start] = 0;
+        remainingCoordinates[start] = 0;
+
+        var coordinatesCostQueue = new PriorityQueue<Coordinate, int>(remainingCoordinates.Select(pair => (pair.Key, pair.Value)));
 
         while (remainingCoordinates.Count > 0)
         {
-            var cheapestNode = remainingCoordinates.MinBy(pair => pair.Value).Key;
+            var cheapestNode = coordinatesCostQueue.Dequeue();
             remainingCoordinates.Remove(cheapestNode);
 
             foreach (var neighbour in GetNeighbours(cheapestNode, remainingCoordinates))
@@ -33,6 +35,7 @@ public static class DayFifteen
 
                 costLookup[neighbour] = nextNodeCost;
                 remainingCoordinates[neighbour] = nextNodeCost;
+                coordinatesCostQueue.Enqueue(neighbour, nextNodeCost);
             }
         }
 
