@@ -18,7 +18,8 @@ public static class Runner
         {12, DayTwelve.Run},
         {13, DayThirteen.Run},
         {14, DayFourteen.Run},
-        {15, DayFifteen.Run}
+        {15, DayFifteen.Run},
+        {16, DaySixteen.Run}
     };
 
     public static void Main(string[] args)
