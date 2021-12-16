@@ -2,39 +2,56 @@ namespace Code;
 
 public static class DaySixteen
 {
+    // ReSharper disable once NotAccessedPositionalProperty.Local
     private abstract record Packet(ushort Version, ushort Type);
 
     private record LiteralValuePacket(ushort Version, ushort Type, ulong Value) : Packet(Version, Type);
 
+    // ReSharper disable once NotAccessedPositionalProperty.Local
     private record OperatorPacket(ushort Version, ushort Type, char LengthType, IEnumerable<Packet> SubPackets): Packet(Version, Type);
 
     public static void Run()
     {
         var rawPacket = File.ReadAllLines("./Resources/DaySixteenInput.txt").First();
-        var sum = GetVersionSum(rawPacket);
+        var sum = CalculateValue(rawPacket);
 
         Console.WriteLine($"Sum version numbers of all packets: {sum}");
     }
 
-    private static int GetVersionSum(string rawPacket)
+    private static ulong CalculateValue(string rawPacket)
     {
-        var (packet, _) = ParsePacket(ConvertHexStringToBinary(rawPacket));
-        var sumVersion = GetVersionSum(packet);
+        var (rootPacket, _) = ParsePacket(ConvertHexStringToBinary(rawPacket));
 
-        return sumVersion;
+        return CalculateValue(rootPacket);
     }
 
-    private static int GetVersionSum(Packet packet)
+    private static ulong CalculateValue(Packet packet)
     {
-        var sumVersion = (int)packet.Version;
+        return packet.Type == 4 ? ((LiteralValuePacket) packet).Value : CalculateValue((OperatorPacket)packet);
+    }
 
-        if (packet.Type == 4) return sumVersion;
-        
-        // packet is operator type.
-        var opPacket = (OperatorPacket) packet;
-        sumVersion += opPacket.SubPackets.Sum(GetVersionSum);
-
-        return sumVersion;
+    private static ulong CalculateValue(OperatorPacket operatorPacket)
+    {
+        return operatorPacket.Type switch
+        {
+            0 => operatorPacket.SubPackets.Aggregate(0ul, (sum, packet) => CalculateValue(packet) + sum),
+            1 => operatorPacket.SubPackets.Aggregate(1ul, (sum, packet) => CalculateValue(packet) * sum),
+            2 => operatorPacket.SubPackets.Min(CalculateValue),
+            3 => operatorPacket.SubPackets.Max(CalculateValue),
+            5 => CalculateValue(operatorPacket.SubPackets.First()) >
+                 CalculateValue(operatorPacket.SubPackets.Skip(1).First())
+                ? 1u
+                : 0u,
+            6 => CalculateValue(operatorPacket.SubPackets.First()) <
+                 CalculateValue(operatorPacket.SubPackets.Skip(1).First())
+                ? 1u
+                : 0u,
+            7 => CalculateValue(operatorPacket.SubPackets.First()) ==
+                 CalculateValue(operatorPacket.SubPackets.Skip(1).First())
+                ? 1u
+                : 0u,
+            _ => throw new ArgumentOutOfRangeException(nameof(operatorPacket.Type), "Packet type out of range")
+        };
     }
 
     private static (Packet, string) ParsePacket(string bits)
