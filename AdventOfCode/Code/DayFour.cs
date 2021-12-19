@@ -1,15 +1,19 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 internal static class DayFour
 {
     private record Game(IEnumerable<int> Numbers, IEnumerable<Board> Boards);
-        
+
+    [Test]
     public static void Run()
     {
-        FindLastWinner(File.ReadLines("./Resources/DayFourInput.txt"));
+        FindLastWinner(File.ReadLines("./Resources/DayFourInput.txt")).Should().Be(9576);
     }
 
-    private static void FindLastWinner(IEnumerable<string> input)
+    private static int FindLastWinner(IEnumerable<string> input)
     {
         var game = ParseGame(input);
         var winners = new Dictionary<string, Board>();
@@ -23,15 +27,18 @@ internal static class DayFour
                 var winner = board.MarkNumber(numberCalled);
 
                 if (!winner) continue;
-                    
+
                 winners[board.Id] = board;
-                    
+
                 if (winners.Count != game.Boards.Count()) continue;
-                    
-                Console.WriteLine($"Found final winner:\n\n{board}\nWinning value:{board.CalculateScore(numberCalled)}");
-                return;
+
+                Console.WriteLine(
+                    $"Found final winner:\n\n{board}\nWinning value:{board.CalculateScore(numberCalled)}");
+                return board.CalculateScore(numberCalled);
             }
         }
+
+        return 0;
     }
 
     // ReSharper disable once UnusedMember.Local

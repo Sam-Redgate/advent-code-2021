@@ -1,16 +1,21 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 internal static class DayThree
 {
+    [Test]
     public static void Run()
     {
-        Test();
         var input = File.ReadLines("./Resources/DayThreeInput.txt").ToArray();
-        Console.WriteLine($"Oxygen Generator Rating: {FindOxygenGeneratorRating(input)}");
-        Console.WriteLine($"CO2 Scrubber Rating: {FindCO2ScrubberRating(input)}");
+        var oxygenRating = FindOxygenGeneratorRating(input);
+        var co2Rating = FindCO2ScrubberRating(input);
+        (Convert.ToUInt64(oxygenRating, 2) * Convert.ToUInt64(co2Rating, 2)).Should().Be(6940518);
     }
 
-    private static void Test()
+    [Test]
+    public static void Test()
     {
         var input = new[]
         {
@@ -30,11 +35,11 @@ internal static class DayThree
 
         var oxygenResult = FindOxygenGeneratorRating(input);
 
-        Console.WriteLine($"{oxygenResult} == 10111? {oxygenResult.Equals("10111")}");
+        oxygenResult.Should().Be("10111");
 
         var co2Result = FindCO2ScrubberRating(input);
             
-        Console.WriteLine($"{co2Result} == 01010? {co2Result.Equals("01010")}");
+        co2Result.Should().Be("01010");
     }
 
     private static string FindOxygenGeneratorRating(string[] input, int index = 0)

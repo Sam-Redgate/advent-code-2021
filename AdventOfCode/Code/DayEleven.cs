@@ -1,4 +1,7 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 public record Coordinate(int X, int Y);
 
@@ -6,6 +9,7 @@ public record Octopus(int Energy, bool HasFlashed);
 
 public static class DayEleven
 {
+    [Test]
     public static void Run()
     {
         var octopusMap = ParseMap(File.ReadAllLines("./Resources/DayElevenInput.txt"));
@@ -20,7 +24,7 @@ public static class DayEleven
 
         } while (octopusMap.Sum(pair => pair.Value.Energy) != 0);
 
-        
+        daysToRun.Should().Be(348);
     }
 
     private static Dictionary<Coordinate, Octopus> ParseMap(IEnumerable<string> input)

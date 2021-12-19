@@ -1,11 +1,17 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 public static class DayNine
 {
+    [Test]
     public static void Run()
     {
         var map = new HeatMap(File.ReadLines("./Resources/DayNineInput.txt"));
-        Console.Out.WriteLine(map.Basins.OrderByDescending(b => b.Length).Take(3).Aggregate(1, (sum, b) => sum * b.Length));
+        var threeLargestBasinSize = map.Basins.OrderByDescending(b => b.Length).Take(3).Aggregate(1, (sum, b) => sum * b.Length);
+        Console.Out.WriteLine(threeLargestBasinSize);
+        threeLargestBasinSize.Should().Be(949905);
     }
 }
 

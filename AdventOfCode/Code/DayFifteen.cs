@@ -1,7 +1,11 @@
+using FluentAssertions;
+using NUnit.Framework;
+
 namespace Code;
 
 public static class DayFifteen
 {
+    [Test]
     public static void Run()
     {
         var page = ParseMap(File.ReadLines("./Resources/DayFifteenInput.txt").ToArray());
@@ -10,6 +14,7 @@ public static class DayFifteen
         var shortestCost =
             GetShortestPathCost(map, new Coordinate(0, 0), new Coordinate(map[0].Length - 1, map.Length - 1));
         Console.WriteLine(shortestCost);
+        shortestCost.Should().Be(2952);
     }
 
     // Dijkstra, though it really should be A* I think, which should be quicker.

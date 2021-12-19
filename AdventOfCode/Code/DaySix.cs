@@ -1,11 +1,14 @@
 ﻿#nullable enable
 using System.Text;
+using FluentAssertions;
+using NUnit.Framework;
 
 namespace Code;
 
 internal static class DaySix
 {
-    internal static void Run()
+    [Test]
+    public static void Run()
     { 
         var school = new LanternfishSchool(File.ReadLines("./Resources/DaySixInput.txt").First());
         const int daysToRun = 256;
@@ -14,7 +17,10 @@ internal static class DaySix
         {
             school.IncrementDay();
         }
-        Console.WriteLine($"There are {school.CountFish()} lanternfish.");
+
+        var lanternfish = school.CountFish();
+        Console.WriteLine($"There are {lanternfish} lanternfish.");
+        lanternfish.Should().Be(1741362314973u);
     }
 }
 

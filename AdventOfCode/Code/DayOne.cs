@@ -1,10 +1,14 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 internal static class DayOne
 {
+    [Test]
     public static void Run()
     {
-        Console.WriteLine(CountDepthIncreases(File.ReadLines("./Resources/DayOneInput.txt")));
+        CountDepthIncreases(File.ReadLines("./Resources/DayOneInput.txt")).Should().Be(1471);
     }
 
     private static int CountDepthIncreases(IEnumerable<string> depthMeasurements) =>

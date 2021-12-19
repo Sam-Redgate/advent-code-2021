@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using FluentAssertions;
+using NUnit.Framework;
 
 namespace Code;
 
@@ -6,9 +8,10 @@ internal static class DayEight
 {
     private record Entry(IEnumerable<string> Signals, IEnumerable<string> Values);
 
+    [Test]
     public static void Run()
     {
-        var entries = ParseValues(File.ReadLines("./Resources/DayEight.txt"));
+        var entries = ParseValues(File.ReadLines("./Resources/DayEightInput.txt"));
 
         var sum = 0;
 
@@ -20,6 +23,7 @@ internal static class DayEight
         }
 
         Console.WriteLine(sum);
+        sum.Should().Be(1068933);
     }
 
     private static IEnumerable<Entry> ParseValues(IEnumerable<string> inputs) => inputs.Select(ParseEntry);

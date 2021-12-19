@@ -1,7 +1,11 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 internal static class DayTen
 {
+    [Test]
     public static void Run()
     {
         IEnumerable<ulong> scores = Array.Empty<ulong>();
@@ -19,8 +23,10 @@ internal static class DayTen
         }
 
         scores = scores.OrderBy(score => score).ToArray();
-            
-        Console.WriteLine(scores.Skip(scores.Count() / 2).Take(1).First());
+
+        var result = scores.Skip(scores.Count() / 2).Take(1).First();
+        Console.WriteLine(result);
+        result.Should().Be(3646451424);
     }
 }
 

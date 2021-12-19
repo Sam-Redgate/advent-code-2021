@@ -1,4 +1,7 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 internal static class DayTwo
 {
@@ -13,10 +16,12 @@ internal static class DayTwo
 
     private record Heading(Direction Direction, int Distance);
 
+    [Test]
     public static void Run()
     {
-        Console.WriteLine($"Test result: {Test()}");
-        Console.WriteLine(CalculateSumPosition(File.ReadLines("./Resources/DayTwoInput.txt")));
+        var position = CalculateSumPosition(File.ReadLines("./Resources/DayTwoInput.txt"));
+
+        (position.Horizontal * position.Depth).Should().Be(1872757425);
     }
 
     private static Position CalculateSumPosition(IEnumerable<string> input)
@@ -55,7 +60,8 @@ internal static class DayTwo
 
     private static Direction ParseDirection(string direction) => Enum.Parse<Direction>(direction, true);
 
-    private static bool Test()
+    [Test]
+    public static void Test()
     {
         var input = new[]
         {
@@ -69,6 +75,6 @@ internal static class DayTwo
 
         var result = CalculateSumPosition(input);
 
-        return result.Horizontal * result.Depth == 900;
+        (result.Horizontal * result.Depth).Should().Be(900);
     }
 }

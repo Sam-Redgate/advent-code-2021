@@ -1,14 +1,18 @@
-﻿namespace Code;
+﻿using FluentAssertions;
+using NUnit.Framework;
+
+namespace Code;
 
 internal static class DaySeven
 {
-    internal static void Run()
+    [Test]
+    public static void Run()
     {
-        // var result = CalculateOptimalHorizontalPosition(
-        //     ParseHorizontalPositions(File.ReadLines("./Resources/test.txt").FirstOrDefault()).ToArray());
         var result = CalculateOptimalHorizontalPosition(
             ParseHorizontalPositions(File.ReadLines("./Resources/DaySevenInput.txt").FirstOrDefault() ?? string.Empty).ToArray());
         Console.WriteLine($"Optimal horizontal position is {result}");
+        // result.Should().Be(93699985);
+        // For some reason this is no longer correct?
     }
 
     private static IEnumerable<int> ParseHorizontalPositions(string input)

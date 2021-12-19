@@ -1,7 +1,11 @@
+using FluentAssertions;
+using NUnit.Framework;
+
 namespace Code;
 
 public static class DayFourteen
 {
+    [Test]
     public static void Run()
     {
         var input = File.ReadLines("./Resources/DayFourteenInput.txt").ToArray();
@@ -12,7 +16,9 @@ public static class DayFourteen
 
         var (leastCommonElementCount, mostCommonElementCount) = FindLeastAndMostCommonElement(template, rules, steps);
 
-        Console.WriteLine($"Result: {mostCommonElementCount - leastCommonElementCount}");
+        var result = mostCommonElementCount - leastCommonElementCount;
+        Console.WriteLine($"Result: {result}");
+        result.Should().Be(3572761917024u);
     }
 
     private static (ulong, ulong) FindLeastAndMostCommonElement(string template, Dictionary<string, char> rules,

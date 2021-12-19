@@ -1,11 +1,14 @@
 ﻿using System.Text;
+using FluentAssertions;
+using NUnit.Framework;
 
 namespace Code;
 
 internal static class DayThirteen
 {
     private record FoldInstruction(char Axis, int Value);
-    
+
+    [Test]
     public static void Run()
     {
         var input = File.ReadLines("./Resources/DayThirteenInput.txt").ToArray();
@@ -16,8 +19,6 @@ internal static class DayThirteen
         var maxWidth = dots.Max(coordinate => coordinate.X) + 1;
 
         var page = BuildPage(dots, maxHeight, maxWidth);
-        
-        Console.WriteLine($"Starting page:\n{PrintPage(page)}\n");
 
         page = instructions.Aggregate(page, FoldPage);
 
@@ -26,6 +27,7 @@ internal static class DayThirteen
         var sum = PageIterator(page).Count(coordinate => page[coordinate.Y, coordinate.X] == '#');
 
         Console.WriteLine($"Number of dots: {sum}");
+        sum.Should().Be(102);
     }
 
     private static char[,] FoldPage(char[,] page, FoldInstruction instruction)
@@ -138,7 +140,7 @@ internal static class DayThirteen
         
         foreach (var (x, y) in PageIterator(page))
         {
-            page[y, x] = '.';
+            page[y, x] = ' ';
         }
 
         foreach (var (x, y) in dots)

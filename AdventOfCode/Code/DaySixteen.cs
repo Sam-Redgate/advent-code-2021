@@ -1,3 +1,6 @@
+using FluentAssertions;
+using NUnit.Framework;
+
 namespace Code;
 
 public static class DaySixteen
@@ -10,12 +13,14 @@ public static class DaySixteen
     // ReSharper disable once NotAccessedPositionalProperty.Local
     private record OperatorPacket(ushort Version, ushort Type, char LengthType, IEnumerable<Packet> SubPackets): Packet(Version, Type);
 
+    [Test]
     public static void Run()
     {
         var rawPacket = File.ReadAllLines("./Resources/DaySixteenInput.txt").First();
         var sum = CalculateValue(rawPacket);
 
         Console.WriteLine($"Sum version numbers of all packets: {sum}");
+        sum.Should().Be(911945136934u);
     }
 
     private static ulong CalculateValue(string rawPacket)

@@ -1,9 +1,13 @@
+using FluentAssertions;
+using NUnit.Framework;
+
 namespace Code;
 
 public static class DaySeventeen
 {
     private record Velocity(int X, int Y);
-    
+
+    [Test]
     public static void Run()
     {
         const string target = "target area: x=169..206, y=-108..-68";
@@ -21,17 +25,22 @@ public static class DaySeventeen
         var highestYValue = firstYValue > secondYValue ? firstYValue : secondYValue;
         var highestXValue = firstXValue > secondXValue ? firstXValue : secondXValue;
 
-        var velocities = CalculateDistinctFiringVelocities(new Coordinate(highestXValue, highestYValue), new Coordinate(lowestXValue, lowestYValue));
+        var velocities = CalculateDistinctFiringVelocities(new Coordinate(highestXValue, highestYValue),
+            new Coordinate(lowestXValue, lowestYValue));
 
-        Console.WriteLine($"Unique firing velocities: {velocities.Count()}");
+        var result = velocities.Count();
+        Console.WriteLine($"Unique firing velocities: {result}");
+        result.Should().Be(2576);
     }
 
-    private static IEnumerable<Velocity> CalculateDistinctFiringVelocities(Coordinate greaterCorner, Coordinate lesserCorner)
+    private static IEnumerable<Velocity> CalculateDistinctFiringVelocities(Coordinate greaterCorner,
+        Coordinate lesserCorner)
     {
         return new HashSet<Velocity>(EnumerateValidFiringVelocities(greaterCorner, lesserCorner));
     }
 
-    private static IEnumerable<Velocity> EnumerateValidFiringVelocities(Coordinate greaterCorner, Coordinate lesserCorner)
+    private static IEnumerable<Velocity> EnumerateValidFiringVelocities(Coordinate greaterCorner,
+        Coordinate lesserCorner)
     {
         var testVelocities = EnumeratePotentialFiringVelocities(greaterCorner, lesserCorner);
         var boundsX = greaterCorner.X;
@@ -67,9 +76,9 @@ public static class DaySeventeen
         // A velocity with lower value than this can't possibly hit the target.
         var floorX = (int) Math.Sqrt(lesserCorner.X * 2) - 1;
         var floorY = lesserCorner.Y;
-        
+
         // A velocity with higher value than this can't possibly hit the target.
-        var ceilingX = greaterCorner.X; 
+        var ceilingX = greaterCorner.X;
         var ceilingY = Math.Abs(lesserCorner.Y);
 
         for (var x = floorX; x <= ceilingX; x++)
@@ -85,8 +94,8 @@ public static class DaySeventeen
     {
         var nextVelocity = velocity with {X = velocity.X > 0 ? velocity.X - 1 : 0, Y = velocity.Y - 1};
         var nextCoordinate = coordinate with {X = coordinate.X + velocity.X, Y = coordinate.Y + velocity.Y};
-        
-        return (nextCoordinate,nextVelocity);
+
+        return (nextCoordinate, nextVelocity);
     }
 
     // private static IEnumerable<Coordinate> EnumerateCoordinates(Coordinate topLeft, Coordinate bottomRight)
